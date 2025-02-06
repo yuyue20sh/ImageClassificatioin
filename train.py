@@ -91,6 +91,7 @@ def train(model, loss_fn, optimizer, scheduler, n_epochs,
 
     best_vloss = 1_000_000.
 
+    logger.info(model)
     model.to(device)
 
     for epoch in range(n_epochs):
@@ -101,6 +102,7 @@ def train(model, loss_fn, optimizer, scheduler, n_epochs,
             tr_loader, model, loss_fn, optimizer, writer, epoch, logger,
             device, report_interval=500
         )
+        lr_now = scheduler.get_last_lr()[0]
         scheduler.step()
 
         running_vloss = 0.0
@@ -116,6 +118,7 @@ def train(model, loss_fn, optimizer, scheduler, n_epochs,
         avg_vloss = running_vloss / (i + 1)
         logger.info('LOSS train %.4f valid %.4f' % (avg_loss, avg_vloss))
 
+        writer.add_scalar('Learning Rate', lr_now, epoch + 1)
         writer.add_scalars('Training vs. Validation Loss',
                            {'Training': avg_loss, 'Validation': avg_vloss},
                            epoch + 1)
@@ -134,27 +137,33 @@ def train(model, loss_fn, optimizer, scheduler, n_epochs,
 
 if __name__ == '__main__':
 
-    model_name = 'convnext_tiny'
-    n_classes = 3
-
     tr_dir = '/mnt/d/MyFiles/Research/ImageClassification/data/formatted/busi/tr/'
     vl_dir = '/mnt/d/MyFiles/Research/ImageClassification/data/formatted/busi/vl/'
     batch_size = 32
+    in_shape = (512, 512)
 
     tr_loader = DataLoader(
-        dataloader.BUSI_Dataset(tr_dir, transform=True, mask=False),
+        dataloader.BUSI_Dataset(tr_dir, in_shape, transform=False, mask=False),
         batch_size=batch_size, shuffle=True, num_workers=4,
         collate_fn= lambda x : (torch.stack([i[0] for i in x]),
                                 torch.stack([torch.tensor(i[1]['label']) for i in x]))
     )
     vl_loader = DataLoader(
-        dataloader.BUSI_Dataset(vl_dir, transform=False, mask=False),
+        dataloader.BUSI_Dataset(vl_dir, in_shape, transform=False, mask=False),
         batch_size=batch_size, shuffle=False, num_workers=4,
         collate_fn= lambda x : (torch.stack([i[0] for i in x]),
                                 torch.stack([torch.tensor(i[1]['label']) for i in x]))
     )
 
+
+    model_name = 'convnext_tiny'
+    # model_name = 'vit_b_16'
+    # model_name = 'resnet50'
+    n_classes = 3
+
     model = models.get_convnext(model_name, n_classes, new_classifier=False)
+    # model = models.get_vit(model_name, n_classes, new_classifier=False)
+    # model = models.get_resnet(model_name, n_classes, new_classifier=False)
     models.freeze_model(model, pattern='^(?!classifier).*$')
 
     loss_fn = torch.nn.CrossEntropyLoss()

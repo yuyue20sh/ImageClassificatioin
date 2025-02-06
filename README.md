@@ -2,6 +2,7 @@
 
 ```shell
 conda create -n pytorch python=3.13
+conda activate pytorch
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
 pip install notebook
 pip install opencv-python

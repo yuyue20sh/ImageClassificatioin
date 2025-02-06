@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     model_name = 'convnext_tiny'
     n_classes = 3
-    weights_path = '/mnt/d/MyFiles/Research/ImageClassification/runs/convnext_tiny_busi/20250204_173113/cp_5.pth'
+    weights_path = '/mnt/d/MyFiles/Research/ImageClassification/runs/convnext_tiny_busi/20250205_100641/cp_12.pth'
     device = 'cuda'
 
     image_dir = '/mnt/d/MyFiles/Research/ImageClassification/data/formatted/busi/vl/images/'

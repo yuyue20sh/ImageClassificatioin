@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class BUSI_Dataset(Dataset):
-    def __init__(self, data_dir, transform=True, mask=True, normalize_args='mean_std.csv'):
+    def __init__(self, data_dir, in_shape=(512, 512), transform=True, mask=True, normalize_args='mean_std.csv'):
         self.data_dir = data_dir
         self.mask = mask
         self.images = sorted(Path('%s/images/' % data_dir).glob('*.png'))
@@ -36,6 +36,7 @@ class BUSI_Dataset(Dataset):
                 A.Normalize(mean=(normalize_args[0]/255).tolist(), std=(normalize_args[1]/255).tolist()),
                 A.PadIfNeeded(min_height=512, min_width=512),
                 A.RandomCrop(height=512, width=512),
+                A.Resize(height=in_shape[0], width=in_shape[1]),
                 A.ToTensorV2(),
             ])
         else:
@@ -43,6 +44,7 @@ class BUSI_Dataset(Dataset):
                 A.Normalize(mean=normalize_args[0].tolist(), std=normalize_args[1].tolist()),
                 A.PadIfNeeded(min_height=512, min_width=512),
                 A.RandomCrop(height=512, width=512),
+                A.Resize(height=in_shape[0], width=in_shape[1]),
                 A.ToTensorV2()
             ])
 
